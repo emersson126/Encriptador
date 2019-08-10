@@ -1,0 +1,258 @@
+<html>
+
+<title>Emersson Mendoza | EM</title>
+  <meta name="keywords" content="aes256,aes-256,encryption,crypter,decrypt,decryption,cypher, emerssonmendoza, emersson, mendoza, mega" />
+  <meta name="description" content="Encripta tu MENSAJE Privado de manera segura y GRATUITA generando un Password para asegurarte de la persona que recibe le mensaje manera segura y encriptada, tambien puede generar codigo QR de tus URLs.">
+    <meta name="author" content="emerssonmendoza.com">
+    <link rel="icon" type="images/png" href="http://emerssonmendoza.com/imgbck/loguito.png"/>
+
+    <meta name="twitter:card" content="EMERSSON MENDOZA | EM"/>
+    <meta name="twitter:site" content="@emersson3000"/>
+    <meta name="twitter:creator" content="@emersson3000"/>
+    <meta name="twitter:url" content="http://emerssonmendoza.com"/>
+    <meta name="twitter:title" content="Crypter Emersson Mendoza"/>
+
+    <meta name="twitter:description" content="Encripta tu MENSAJE Privado de manera segura y GRATUITA generando un Password para asegurarte de la persona que recibe le mensaje manera segura y encriptada, tambien puede generar codigo QR de tus URLs."/>
+    <meta name="twitter:image" content="http://emerssonmendoza.com/imgbck/EM.png"/>
+
+    <meta property="og:title" content="EMERSSON MENDOZA | EM"/>
+    <meta property="og:url" content="http://emerssonmendoza.com"/>
+    <meta property="og:locale" content="Emersson Mendoza"/>
+    <meta property="og:site_name" content="Emersson Mendoza"/>
+    <meta property="og:type" content="Encripta tu MENSAJE Privado de manera segura y GRATUITA generando un Password para asegurarte de la persona que recibe le mensaje manera segura y encriptada, tambien puede generar codigo QR de tus URLs."/>
+    <meta property="og:image" content="http://emerssonmendoza.com/imgbck/EM2.png"/>
+
+
+    <!-- Favicons-->
+    <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" type="image/x-icon" href="img/apple-touch-icon-57x57-precomposed.png">
+    <link rel="apple-touch-icon" type="image/x-icon" sizes="72x72" href="img/apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon" type="image/x-icon" sizes="114x114" href="img/apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon" type="image/x-icon" sizes="144x144" href="img/apple-touch-icon-144x144-precomposed.png">
+
+    <!-- BASE CSS -->
+
+<style type="text/css">
+body{
+    width:100%;
+    text-align:center;
+    color: black;
+}
+
+div.main {
+	background: #c9c8c9;
+	background: -webkit-gradient(linear, left top, left bottom, from(#f9f8f9), to(#bfbfbf));
+	background: -moz-linear-gradient(top,  #f9f8f9,  #bfbfbf);	border:2px solid gray;
+    width:640px;
+    margin:0 auto;
+    border-radius: 25px;
+    margin-top:20px;
+    margin-bottom:20px;
+}
+#filedrop{
+    background: #c9c8c9;
+	height:50px;
+	width:500px;
+	border:1px solid black;
+    border-radius: 5px;
+	display: table-cell; 
+	vertical-align: middle; 
+}
+</style>
+<script language="javascript" src="jsaes.js"></script>
+<script language="javascript" src="pkb2.js"></script>
+<script type="text/javascript">
+    var file=null;
+	var pkbvisible=false;
+    var worker=null;
+	function Save(data, op){
+        window.URL = window.webkitURL || window.URL;
+        var bb = new Blob([data], { "type" : "application\/octet-stream" });
+        var a = document.createElement('a');
+          a.download = file.name;
+          a.href = window.URL.createObjectURL(bb);
+          a.textContent = op;
+          a.dataset.downloadurl = ['application/octet-stream', a.download, a.href].join(':');
+          if(document.getElementById('download').firstChild)
+            document.getElementById('download').replaceChild(a,document.getElementById('download').firstChild);
+          else
+            document.getElementById('download').appendChild(a);
+	}
+    function dragenter(e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+
+    function dragover(e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    function drop(e) {
+      e.stopPropagation();
+      e.preventDefault();
+
+      var dt = e.dataTransfer;
+      var files = dt.files;
+
+      handleFiles(files);
+    }
+    function handleFiles(f)
+    {
+        file = f[0];
+		document.getElementById("fileproc").innerHTML="Selected file: "+file.name;
+    }
+    
+    function encrypt()
+    {
+		if(document.getElementById("passwd").value.length==0)
+		{
+			alert("Please set a password first!");
+			return;
+		}
+
+        if(file==null)
+		{
+			alert("No file selected!");
+            return;
+		}
+        var reader = new FileReader();
+        reader.onload=function(e){
+            var filedata=e.target.result;
+
+            worker.postMessage({cmd:1,data:filedata,pass:document.getElementById("passwd").value,len:32});
+            delete filedata;
+        };
+        document.getElementById('download').innerHTML="Encrypting ...";
+        reader.readAsArrayBuffer(file);
+    }
+    function decrypt()
+    {
+		if(document.getElementById("passwd").value.length==0)
+		{
+			alert("Please set a password first!");
+			return;
+		}
+        if(file==null)
+		{
+			alert("No file selected!");
+            return;
+		}
+        var reader = new FileReader();
+        reader.onload=function(e){
+            var filedata=e.target.result;
+            
+            worker.postMessage({cmd:2,data:filedata,pass:document.getElementById("passwd").value,len:32});
+            delete filedata;
+        };
+        document.getElementById('download').innerHTML="Decrypting ...";
+        reader.readAsArrayBuffer(file);
+    }
+	function strencrypt()
+	{
+		if(document.getElementById("passwd").value.length==0)
+		{
+			alert("Please set a password first!");
+			return;
+		}
+		var str=document.getElementById("datastr").value;
+		document.getElementById("encstr").value = encode(str, document.getElementById("passwd").value);
+	}
+	function strdecrypt()
+	{
+		if(document.getElementById("passwd").value.length==0)
+		{
+			alert("Please set a password first!");
+			return;
+		}
+		var str=document.getElementById("datastr").value;
+		try
+		{
+			var result = decode(str, document.getElementById("passwd").value);
+		}
+		catch(e)
+		{
+			result = e;
+		}
+		document.getElementById("encstr").value = result;
+	}
+	function keyboard()
+	{
+		PKb.input=document.getElementById("passwd");
+		if(pkbvisible)
+			PKb.remove();
+		else
+			PKb.create(document.getElementById("pkb_container"));
+		pkbvisible=!pkbvisible;
+	}
+	function textsel()
+	{
+		document.getElementById("filenc").style.display="none";
+		document.getElementById("textenc").style.display="block";
+	}
+	function filesel()
+	{
+		document.getElementById("filenc").style.display="block";
+		document.getElementById("textenc").style.display="none";
+	}
+	function load()
+	{
+		if (window.File && window.FileReader && window.FileList && window.Blob) {
+		}
+		else {
+		  alert("The File API is needed for this application! Your browser is not supported!");
+		}
+		var dropbox;
+        dropbox = document.getElementById("filedrop");  
+        dropbox.addEventListener("dragenter", dragenter, false);  
+        dropbox.addEventListener("dragover", dragover, false);  
+        dropbox.addEventListener("drop", drop, false);  
+        
+        worker = new Worker('worker.js');
+        worker.onmessage = function(e) {
+            if(e.data.cmd==0)
+            {
+                Save(e.data.data, e.data.msg);
+            }
+            else
+            if(e.data.cmd==1)
+            {
+                document.getElementById('download').innerHTML = e.data.prg;
+            }
+        };
+	}
+
+</script> 
+</head>
+<body onload="load()">
+<div class="main">
+<table align="center" border="0">
+<tr><td ><img src="key.png"/></td><td align="center"><h1 style="margin:0">Encriptador</h1><b>Encryption con AES-256</b><br></td><td ><img src="key.png"/></td></tr>
+<tr><td colspan="2" align="center"><strong>Password: </strong> <input type="password" id ="passwd" size="30" />(Genera tu Password)</td></tr>
+<tr><td colspan="4" align="center"><div id="pkb_container"></div></td></tr>
+<tr><td colspan="3" align="center"><hr></td></tr>
+<tr><td align="center"><img src="text.png" onclick="textsel()"/></td>
+  <td align="center"><b>ENCRIPTA TU MENSAJE | GENERA CODIGO QR</b></td>
+<td><a href="http://emerssonmendoza.com/Projects/QR" target="_blank"><img src="file.png" alt="" /></a></td>
+
+<tr><td colspan="3" align="center"><hr></td></tr>
+<tr><td colspan="3" align="center"><div id="filenc" style="display:none">
+<div id="filedrop"><b>Drop a file here or </b> <input type="file" name="filedata" onchange="handleFiles(this.files)"/></div><br>
+<p id="fileproc"></p>
+<input type="button" value ="Encrypt" onclick="encrypt()"/>
+<input type="button" value ="Decrypt" onclick="decrypt()"/>
+<h4 id="download"></h4>
+<h5>Files are not uploaded, they are encrypted in the browser.</h5>
+</div></td></tr>
+<tr><td colspan="3" align="center"><div id="textenc" style="display:none">
+<p align="center">Mensaje a Encriptar/Desencriptar:</p><textarea id="datastr" rows="8" cols="50"></textarea>
+<p align="center">Resultado:</p><textarea id="encstr" rows="8" cols="50"></textarea><br><br>
+<input type="button" value ="ENCRYPTAR" onclick="strencrypt()"/>
+<input type="button" value ="DESCENCRIPTAR" onclick="strdecrypt()"/>
+</div></td></tr>
+</table>
+<h5 align="center"><a href="http://emerssonmendoza.com/" target="_blank">Emersson Mendoza | EM</a></h5>
+</div>
+</body>
+
+
+</html>
